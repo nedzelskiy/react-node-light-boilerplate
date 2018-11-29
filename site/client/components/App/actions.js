@@ -33,3 +33,10 @@ export const addTranslations = (lang, translations) => {
     payload: { lang, translations },
   };
 };
+
+export const getTranslations = (lang) => {
+  return {
+    type: constants.GET_TRANSLATIONS,
+    payload: lang,
+  };
+};

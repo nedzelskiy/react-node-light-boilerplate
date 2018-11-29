@@ -1,6 +1,6 @@
-import { getMimeType } from '../utils/helpers';
+import { renderHtml } from '../utils/serverUtils';
 import { getMatchedRoute } from '../../common/utils';
-import { renderHtml, throwError } from '../utils/serverUtils';
+import { getMimeType, throwError } from '../utils/helpers';
 
 export default (req, res) => {
   if (!getMatchedRoute(req.originalUrl)) {
@@ -16,7 +16,6 @@ export default (req, res) => {
   if (!context.url) {
     res.setHeader('Content-Type', getMimeType('html'));
     res.statusCode = 200;
-    console.log(html)
     return res.end(html);
   }
   res.writeHead(302, {

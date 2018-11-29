@@ -23,32 +23,6 @@ const getMimeType = (ext) => {
   return mimeType;
 };
 
-const recursiveFindFile = (dir, subject, options = {}, parentDir = null, foundFiles = []) => {
-  const list = fs.readdirSync(dir);
-  list.forEach((item) => {
-    const newDir = path.resolve(dir, item);
-    if (fs.statSync(newDir).isDirectory()) {
-      recursiveFindFile(newDir, subject, options, item, foundFiles);
-    } else {
-      if (typeof options.parentDir !== 'undefined') {
-        if (options.parentDir !== parentDir) {
-          return;
-        }
-      }
-      const fileName = newDir.split(path.sep).pop();
-      if (fileName.match(subject)) {
-        foundFiles.push({
-          fileName,
-          parentDir,
-          subject,
-          url: newDir,
-        });
-      }
-    }
-  });
-  return foundFiles;
-};
-
 const getLanguageFromHeaders = (langsLine, acceptedLangs) => {
   let lang = null;
   if (langsLine) {
@@ -63,8 +37,30 @@ const getLanguageFromHeaders = (langsLine, acceptedLangs) => {
   return lang;
 };
 
+const log = (err) => {
+  if (
+    !process.env.NODE_ENV
+    || process.env.NODE_ENV !== 'production'
+  ) {
+    console.log(err);
+  } else {
+    console.log('!!!!!!!!!! log in production!');
+    console.log(err);
+  }
+};
+
+const throwError = (message, code, params) => {
+  const error = new Error(message);
+  error.code = code;
+  error.params = params;
+  log(error);
+  throw error;
+};
+
+
 module.exports = {
   getLanguageFromHeaders,
-  recursiveFindFile,
+  log,
+  throwError,
   getMimeType,
 };

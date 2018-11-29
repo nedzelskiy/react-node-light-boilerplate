@@ -1,6 +1,6 @@
 import fs from 'fs';
-import { getMimeType } from '../utils/helpers';
-import { getLanguage, log } from '../utils/serverUtils';
+import { getMimeType, log } from '../utils/helpers';
+import { getLanguage } from '../utils/serverUtils';
 import { createUrlByName } from '../../common/utils';
 
 export default (req, res) => {

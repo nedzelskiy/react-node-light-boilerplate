@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign, global-require, no-nested-ternary, import/no-unresolved */
-import path from 'path';
 import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
@@ -7,7 +6,7 @@ import { StaticRouter } from 'react-router-dom';
 import config from '../../configs';
 import App from '../../client/components/App';
 import Html from '../../client/components/Html';
-import { getLanguageFromHeaders, getMimeType } from './helpers';
+import { getLanguageFromHeaders } from './helpers';
 import configureStore from '../../client/configureStore';
 import {
   updateRoute,
@@ -15,8 +14,6 @@ import {
   setManifest,
   setErrorParams,
 } from '../../client/components/App/actions';
-import ErrorPage from '../../client/components/pages/ErrorPage';
-import initialState from '../../client/components/App/initialState';
 import { getMatchedRoute, isAcceptedLang } from '../../common/utils';
 import { getErrorRoute } from '../../common/helpers';
 
@@ -45,8 +42,8 @@ export const getManifest = () => {
   }
 };
 
-export const initStoreWithDispatch = (req, store, context) => {
-  const lang = context.language ? context.language : getLanguage(req);
+const initStoreWithDispatch = (req, store, context) => {
+  const lang = context.language || getLanguage(req);
   const route = (context.pageName && context.pageName === 'error')
     ? getErrorRoute(req.originalUrl)
     : isAcceptedLang(lang)
@@ -63,16 +60,11 @@ export const initStoreWithDispatch = (req, store, context) => {
     },
   }));
   store.dispatch(setManifest(getManifest()));
-  if (route.pageName !== 'error') {
-    const translations = getTranslations(lang);
-    store.dispatch(addTranslations(lang, translations));
-  } else {
+  store.dispatch(addTranslations(lang, getTranslations(lang)));
+  if (route.pageName === 'error') {
     store.dispatch(setErrorParams(context.error));
   }
-  return {
-    route,
-    context,
-  };
+  return store;
 };
 
 export const getLangCookie = (req) => {
@@ -102,42 +94,10 @@ export const getCheckedLang = (req, language) => {
 
 export const renderHtml = (req, context) => {
   const { store } = configureStore({});
-  initStoreWithDispatch(req, store, context);
-  return renderHtmlWithStore(req, store, context);
+  return renderHtmlToString(req, initStoreWithDispatch(req, store, context), context);
 };
 
-export const renderServerErrorPage = (req) => {
-  const lang = getLanguage(req);
-  const store = {
-    getState: () => {
-      return {
-        App: {
-          ...initialState,
-          route: {
-            params: {
-              language: lang,
-            },
-          },
-          manifest: getManifest(),
-        },
-      };
-    },
-  };
-  // TODO translate text
-  return ReactDOM.renderToStaticMarkup(
-    <Html store={store} isServerErrorPage={true}>
-      <StaticRouter location={req.originalUrl}>
-        <ErrorPage
-          language={lang}
-          code={500}
-          message="Something went wrong!"
-        />
-      </StaticRouter>
-    </Html>,
-  );
-};
-
-export const renderHtmlWithStore = (req, store, context) => {
+const renderHtmlToString = (req, store, context) => {
   return ReactDOM.renderToStaticMarkup(
     <Html store={store}>
       <Provider store={store}>
@@ -149,18 +109,6 @@ export const renderHtmlWithStore = (req, store, context) => {
   );
 };
 
-export const log = (err) => {
-  if (
-    !process.env.NODE_ENV
-    || process.env.NODE_ENV !== 'production'
-  ) {
-    console.log(err);
-  } else {
-    console.log('!!!!!!!!!! log in production!');
-    console.log(err);
-  }
-};
-
 const getRoute = (req) => {
   const route = getMatchedRoute(req.originalUrl);
   if (!route) {
@@ -169,10 +117,3 @@ const getRoute = (req) => {
   return route;
 };
 
-export const throwError = (message, code, params) => {
-  const error = new Error(message);
-  error.code = code;
-  error.params = params;
-  log(error);
-  throw error;
-};

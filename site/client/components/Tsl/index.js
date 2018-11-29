@@ -18,7 +18,7 @@ class Tsl extends React.PureComponent {
 
   render() {
     return (
-      <React.Fragment>{this.translate()}</React.Fragment>
+      <span className="tsl">{this.translate()}</span>
     );
   }
 }

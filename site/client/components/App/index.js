@@ -11,6 +11,7 @@ import ErrorPage from '../pages/ErrorPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import { isThisIsBrowser } from '../../utils/helpers';
 import { getErrorRoute } from '../../../common/helpers';
+import { setLangCookieIfNew } from '../../utils/cookie';
 import { createUrlByName, getMatchedRoute } from '../../../common/utils';
 import './styles.scss';
 
@@ -60,6 +61,10 @@ class App extends React.Component {
       return;
     }
     this.updateCurrentRoute(nextProps);
+  }
+
+  componentDidMount() {
+    setLangCookieIfNew(this.props.language);
   }
 
   updateCurrentRoute(props) {

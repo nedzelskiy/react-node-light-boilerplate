@@ -29,8 +29,14 @@ export function remove(name, domain) {
   return null;
 }
 
-export function setLangCookie(value) {
-  set('lang', value, '', 24 * 3);
+export function setLangCookieIfNew(language) {
+  if (getLangCookie() !== language) {
+    setLangCookie(language);
+  }
+}
+
+export function setLangCookie(lang) {
+  set('lang', lang, '', 24 * 3);
 }
 
 export function getLangCookie() {

@@ -3,12 +3,13 @@ import Router from 'router';
 import { createServer } from 'http';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import { log } from './utils/helpers';
 import finalHandler from './handlers/final';
 import staticHandler from './handlers/static';
 import defaultHandler from './handlers/default';
 import translationsHandler from './handlers/i18n';
 import applicationHandler from './handlers/application';
-import { renderServerErrorPage, log } from './utils/serverUtils';
+import { renderHtml } from './utils/serverUtils';
 
 const router = Router();
 const server = createServer();
@@ -24,14 +25,22 @@ router.use('/', defaultHandler);
 router.use('/:lang', applicationHandler);
 
 let request = null;
+let response = null;
 
 process.on('uncaughtException', (err) => {
   log('uncaughtException', err);
-  if (!request) {
+  if (!response || !request) {
     return null;
   }
-  request.statusCode = 500;
-  return request.end(renderServerErrorPage(request));
+  response.statusCode = 500;
+  // todo translate
+  return response.end(renderHtml(request, {
+    pageName: 'error',
+    error: {
+      message: 'Something went wrong!',
+      code: response.statusCode,
+    },
+  }));
 });
 process.on('warning', (wrr) => {
   log('WRN', wrr.name);
@@ -40,6 +49,7 @@ process.on('warning', (wrr) => {
 });
 
 server.on('request', (req, res) => {
+  response = res;
   request = req;
   return router(req, res, (err) => {
     finalHandler(err, req, res);

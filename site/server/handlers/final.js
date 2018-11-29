@@ -1,14 +1,12 @@
 /* eslint-disable no-multi-assign */
-import configureStore from '../../client/configureStore';
 import {
-  renderHtmlWithStore,
-  initStoreWithDispatch,
+  renderHtml,
   getLanguage,
 } from '../utils/serverUtils';
 
 export default (err, req, res) => {
   if (err) {
-    const params = {
+    const context = {
       language: err.params && err.params.lang
         ? err.params.lang
         : getLanguage(req),
@@ -22,14 +20,12 @@ export default (err, req, res) => {
       case 'EISDIR':
       case '404':
       case 404:
-        params.error.code = res.statusCode = 404;
+        context.error.code = res.statusCode = 404;
         break;
       default:
-        params.error.code = res.statusCode = 500;
+        context.error.code = res.statusCode = 500;
     }
-    const { store } = configureStore({});
-    const { context } = initStoreWithDispatch(req, store, params);
-    const html = renderHtmlWithStore(req, store, context);
+    const html = renderHtml(req, context);
     res.statusCode = 200;
     return res.end(html);
   }
