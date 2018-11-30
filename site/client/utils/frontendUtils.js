@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign, no-multi-assign, prefer-destructuring */
+import axios from 'axios';
 import get from 'get-value';
-import request from 'superagent';
 import { Promise } from 'es6-promise';
 import config from '../../configs';
 import { getLangCookie } from './cookie';
@@ -25,17 +25,12 @@ export const getCheckedLang = (language) => {
 };
 
 export const getGetRequest = (url, params) => {
-  return new Promise((resolve, reject) => {
-    const requestInstance = request('GET', url)
-      .accept('application/json')
-      .query(params);
-
-    requestInstance.end((err, res) => {
-      if (err) {
-        reject(res ? res.body : err);
-      } else {
-        resolve(res.body);
-      }
+  return axios
+    .create({
+      params,
+    })
+    .get(url)
+    .then((response) => {
+      return response.data;
     });
-  });
 };

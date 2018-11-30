@@ -34,6 +34,7 @@ function* getTranslations(action) {
     const translations = yield call(getTranslationsAPI, language);
     yield put(addTranslations(language, translations));
   } catch (e) {
+    console.error('getTranslations saga error: ', e);
     yield;
   }
 }

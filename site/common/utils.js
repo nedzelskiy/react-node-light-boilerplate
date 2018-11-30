@@ -5,10 +5,20 @@ import routes from '../client/components/App/routes';
 import config from '../configs';
 
 export const getMatchedRoute = (url) => {
+  if (!getMatchedRoute.cache) {
+    getMatchedRoute.cache = {};
+  }
+  const cachedRoute = getMatchedRoute.cache[url];
+  if (typeof getMatchedRoute.cache[url] !== 'undefined') {
+    return cachedRoute;
+  }
   let route = null;
   routes.some((r) => {
     const match = matchPath(url, r);
-    if (match && isAcceptedLang(match.params.language)) {
+    if (
+      match
+      && (!match.params.language || isAcceptedLang(match.params.language))
+    ) {
       route = r;
       route.params = match.params;
       route.currentUrl = url;
@@ -16,6 +26,9 @@ export const getMatchedRoute = (url) => {
     }
     return false;
   });
+  getMatchedRoute.cache[url] = route
+    ? { ...route }
+    : null;
   return route;
 };
 

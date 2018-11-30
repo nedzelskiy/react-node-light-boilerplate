@@ -1,7 +1,4 @@
-const SERVER__SRC = process.env.SERVER__SRC_FOLDER;
-const configs = require(`./${SERVER__SRC}/configs`);
-
-require('@babel/register')(configs.getBabelrcByBrowserQuery('defaults'));
+require('@babel/register')(require('./babelconf').getBabelrcByBrowserQuery('defaults'));
 
 delete require.cache[require.resolve('./webpack.config')];
 const webpack = require('webpack');

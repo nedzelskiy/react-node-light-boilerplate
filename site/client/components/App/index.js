@@ -2,7 +2,7 @@ import React from 'react';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Redirect, Route } from 'react-router';
+import { Route } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import Header from '../Header';
 import Footer from '../Footer';
@@ -38,10 +38,12 @@ class App extends React.Component {
       path: props.matchedRoute.path,
       params: props.matchedRoute.params,
     };
-    if (!isEqual(newRouterState, props.route)) {
-      newRouterState.prevUrl = props.route.currentUrl;
-      updateFunc(newRouterState);
+    if (isEqual(newRouterState, props.route)) {
+      return false;
     }
+    newRouterState.prevUrl = props.route.currentUrl;
+    updateFunc(newRouterState);
+    return true;
   }
 
   static getErrorRoute(props) {
@@ -56,11 +58,10 @@ class App extends React.Component {
     this.updateCurrentRoute(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!isThisIsBrowser()) {
-      return;
-    }
-    this.updateCurrentRoute(nextProps);
+  shouldComponentUpdate(nextProps) {
+    return isThisIsBrowser()
+      ? this.updateCurrentRoute(nextProps)
+      : false;
   }
 
   componentDidMount() {
@@ -68,14 +69,16 @@ class App extends React.Component {
   }
 
   updateCurrentRoute(props) {
-    if (props.matchedRoute) {
-      App.updateRoute(this.props.updateRoute, props);
-    } else {
-      App.updateRoute(this.props.updateRoute, {
+    if (props.location.pathname === '/') {
+      props.history.push(createUrlByName('home', { ...props }));
+      return false;
+    }
+    return props.matchedRoute
+      ? App.updateRoute(this.props.updateRoute, props)
+      : App.updateRoute(this.props.updateRoute, {
         ...props,
         matchedRoute: App.getErrorRoute(props),
       });
-    }
   }
 
   renderNotFoundPage() {
@@ -107,21 +110,12 @@ class App extends React.Component {
 
   renderContent() {
     if (!this.props.matchedRoute) {
-      if (this.props.location.pathname === '/') {
-        return (
-          <Redirect
-            key="home"
-            to={createUrlByName('home', { ...this.props })}
-          />
-        );
-      }
       return this.renderErrorPage();
     }
     return (
       <Route
         {...this.props.matchedRoute}
         key={this.props.matchedRoute.path}
-        component={this.props.matchedRoute.component}
       />
     );
   }
@@ -130,7 +124,7 @@ class App extends React.Component {
     return (
       <React.Fragment>
         <Header />
-        { this.renderContent() }
+        {this.renderContent()}
         <Footer />
       </React.Fragment>
     );

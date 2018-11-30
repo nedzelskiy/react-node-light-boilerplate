@@ -34,7 +34,6 @@ class OrderPage extends React.PureComponent {
         <div>
           <Navlink to="/">
             <Tsl id="Go to" />
-            { ' ' }
             /
           </Navlink>
         </div>

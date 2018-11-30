@@ -5,17 +5,16 @@ const path = require('path');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const client = require('./client');
-const configs = require('./site/configs');
+const babelConfig = require('./babelconf').getBabelrcByBrowserQuery('defaults');
 const webpackUtils = require('./webpack.utils');
 const restartServer = require('./ops/scripts/restart-app');
-
-const { WebpackOnBuildPlugin } = client.plugins;
 
 let manifest = {};
 
 module.exports = {
-  entry: client.entry,
+  entry: {
+    app: path.resolve(__dirname, 'site/client/client/'),
+  },
   output: {
     path: path.resolve('site/static/js/'),
     filename: '[name].js',
@@ -40,7 +39,7 @@ module.exports = {
         test: /\.(js|jsx)$/,
         use: {
           loader: 'babel-loader',
-          options: Object.assign({}, configs.getBabelrcByBrowserQuery('defaults')),
+          options: Object.assign({}, babelConfig),
         },
         exclude: /node_modules/,
       },
@@ -65,7 +64,7 @@ module.exports = {
       'site/static/css/',
       'site/static/manifest.json',
     ], {}),
-    new WebpackOnBuildPlugin({
+    new webpackUtils.WebpackOnBuildPlugin({
       onEmit: (compilation, callback) => {
         manifest = webpackUtils.setChunksHashesToManifest(compilation, manifest);
         callback();
