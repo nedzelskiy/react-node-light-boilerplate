@@ -1,7 +1,4 @@
 /* eslint-disable prefer-destructuring */
-const fs = require('fs');
-const path = require('path');
-
 const getMimeType = (ext) => {
   let mimeType = 'text/plain';
   switch (ext) {

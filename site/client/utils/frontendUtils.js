@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign, no-multi-assign, prefer-destructuring */
 import axios from 'axios';
 import get from 'get-value';
-import { Promise } from 'es6-promise';
 import config from '../../configs';
 import { getLangCookie } from './cookie';
 import { isAcceptedLang } from '../../common/utils';

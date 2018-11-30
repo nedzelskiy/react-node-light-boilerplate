@@ -6,7 +6,7 @@ import { StaticRouter } from 'react-router-dom';
 import config from '../../configs';
 import App from '../../client/components/App';
 import Html from '../../client/components/Html';
-import { getLanguageFromHeaders } from './helpers';
+import { getLanguageFromHeaders, log } from './helpers';
 import configureStore from '../../client/configureStore';
 import {
   updateRoute,
@@ -116,4 +116,3 @@ const getRoute = (req) => {
   }
   return route;
 };
-
